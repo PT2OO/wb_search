@@ -1,6 +1,6 @@
 <h1>WAYBACK SEARCH TOOL</h1>
 
-Example: `python3 wb_search.py --d www.metronet.com --sref wb_search_patterns.txt --sf wb_search_strings.txt --more_print 50 --y 2023 --eachDay true --m 10 --saveRes "/tmp/WB_DB" --verbose true`
+Example: `python3 wb_search.py --d www.domain.com --sref wb_search_patterns.txt --sf wb_search_strings.txt --more_print 50 --y 2023 --eachDay true --m 10 --saveRes "/tmp/WB_DB" --verbose true`
 
 ```
 Usage: python3 wb_search.py [-h] [--d D] [--file FILE] [--s S] [--sf SF] [--sre SRE] [--sref SREF] [--more_print MORE_PRINT] [--y Y] [--m M] [--extract EXTRACT] [--eachMonth EACHMONTH] [--eachDay EACHDAY] [--output OUTPUT] [--saveRes SAVERES] [--verbose VERBOSE]
