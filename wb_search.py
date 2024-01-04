@@ -617,7 +617,7 @@ if find_str is None and path_find_str is not None:
 			list_find_str.append(line.strip().replace("\n",""))
 
 if find_str is not None:
-	list_find_str.append(find_str)
+	list_find_str.append("String\t" + find_str)
 
 
 	
@@ -632,7 +632,7 @@ if sre is None and sref is not None:
 			list_pattern.append(line.strip().replace("\n",""))
 
 if sre is not None:
-	list_pattern.append(sre)
+	list_pattern.append("Pattern\t" + sre)
 
 	
 if len(list_pattern) == 0 and len(list_find_str) == 0:
