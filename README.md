@@ -27,3 +27,6 @@ Optional arguments:
   --verbose VERBOSE     Verbose
   --proxy PROXY         --proxy http://127.0.0.1:8080
 ```
+
+![image](https://github.com/phutr4n/wb_search/assets/50159034/506be8af-70f2-4723-b662-47e62f7ab7d8)
+
