@@ -210,7 +210,7 @@ def get_time_by_day(url, time_by_day):
 
 
 def isExcludedExt(input):
-	excluded_ext = [".jpg", ".jpeg", ".png", ".gif", ".css",".svg", ".mp4", ".mp3"]
+	excluded_ext = [".jpg", ".jpeg", ".png", ".gif", ".css",".svg", ".mp4", ".mp3", ".webp"]
 	for ext in excluded_ext:
 		if ext in input:
 			return True
