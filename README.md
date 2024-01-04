@@ -6,7 +6,7 @@ Example: `python3 wb_search.py --d www.domain.com --sref wb_search_patterns.txt 
 Usage: python3 wb_search.py [-h] [--d D] [--file FILE] [--s S] [--sf SF] [--sre SRE] [--sref SREF] [--more_print MORE_PRINT] [--y Y] [--m M] [--extract EXTRACT] [--eachMonth EACHMONTH] [--eachDay EACHDAY] [--output OUTPUT] [--saveRes SAVERES] [--verbose VERBOSE]
                     [--proxy PROXY] [--example EXAMPLE]
 
-optional arguments:
+Optional arguments:
   -h, --help            show this help message and exit
   --d D                 Domain needed to wayback
   --file FILE           --file /path_to_file/domains.txt
