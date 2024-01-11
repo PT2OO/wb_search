@@ -70,7 +70,7 @@ def send_request(domain, api, data, headers, retry_record=False):
 			return r
 		except:
 			retry = True
-			print(colored("[Error] Can't connect to {}".format(domain), "red"))
+			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count), domain), "red"))
 			retry_count += 1
 			time.sleep(5)
 	if retry_record:
@@ -83,7 +83,7 @@ def send_request_2(url, retry_record=False):
 	retry_count = 0
 	retry = True	
 	global HTTP_CONFIG
-	while retry and retry < 10: 
+	while retry and retry_count < 10: 
 		try:	
 			r = requests.get(url, verify=False, allow_redirects=True, timeout=20)
 			retry = False
@@ -91,7 +91,7 @@ def send_request_2(url, retry_record=False):
 			return r
 		except:
 			retry = True
-			print(colored("[Error] Can't connect to {}".format(url), "red"))
+			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count),url), "red"))
 			retry_count += 1
 			time.sleep(5)
 	if retry_record:
@@ -261,6 +261,9 @@ def get_all_links(url):
 	found = []
 	# Make a request to the URL
 	response = send_request_2(url)
+
+	if response is None:
+		return found
 
 	# Check if the request was successful (status code 200)
 	if response.status_code == 200:
@@ -564,7 +567,7 @@ def send_request_multiThread(url, found_fulltimes, list_find_str, numOfThreads, 
 	
 
 def find(url, found_fulltimes, list_find_str, num_of_threads, timestamp, more_print, output, verbose, saveRes, list_pattern):
-	print(colored("==> Checking domain {}".format(url), "yellow"))
+	# print(colored("==> Checking domain {}".format(url), "yellow"))
 	# print(colored("    [#] String:", "yellow"))
 	# for x in list_find_str:
 	# 	print(colored("                {}".format(x), "yellow"))
@@ -709,6 +712,7 @@ filtered_fulltimes = []
 #year/month: None/blank => Check all 
 
 if url is not None and file is None:
+	print(colored("==> Checking domain {}".format(url), "yellow"))
 	found_fulltimes = get_snapshot_fulltime(url, year, month)
 
 	if len(found_fulltimes) > 0:
@@ -753,6 +757,7 @@ if url is None and file is not None:
 		for line in f2:
 			url = line.strip().replace("\n", "")
 			if is_line_in_file(checked_file_path, url) == False:
+				print(colored("==> Checking domain {}".format(url), "yellow"))
 				found_fulltimes = get_snapshot_fulltime(url, year, month)
 				if len(found_fulltimes) > 0:
 					if eachMonth == "true":
