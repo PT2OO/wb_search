@@ -63,17 +63,21 @@ def send_request(domain, api, data, headers, retry_record=False):
 	retry = True	
 	global HTTP_CONFIG
 	while retry and retry_count < 10: 
-		try:	
+		try:
+			print("debug1")
 			r = requests.get("https://{}".format(domain) + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True, timeout=20)
 			retry = False
 			# print(colored("[Info] Connected to {}".format(domain), "green"))
 			return r
 		except:
 			retry = True
-			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count), domain), "red"))
 			retry_count += 1
+			print("debug2")
+			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count), domain), "red"))
+			
 			time.sleep(5)
 	if retry_record:
+		print("debug3")
 		print(colored("[INFO] SKIP {}".format("https://{}".format(domain) + api), "yellow"))
 		RETRY_TARGET.append(domain)
 	return None
