@@ -62,7 +62,7 @@ def send_request(domain, api, data, headers, retry_record=False):
 	retry_count = 0
 	retry = True	
 	global HTTP_CONFIG
-	while retry and retry < 10: 
+	while retry and retry_count < 10: 
 		try:	
 			r = requests.get("https://{}".format(domain) + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True, timeout=20)
 			retry = False
