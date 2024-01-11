@@ -76,6 +76,7 @@ def send_request(domain, api, data, headers, retry_record=False):
 	if retry_record:
 		print(colored("[INFO] SKIP {}".format("https://{}".format(domain) + api), "yellow"))
 		RETRY_TARGET.append(domain)
+	return None
 
 def send_request_2(url, retry_record=False):
 	global RETRY_TARGET
@@ -96,6 +97,7 @@ def send_request_2(url, retry_record=False):
 	if retry_record:
 		print(colored("[INFO] SKIP {}".format(url), "yellow"))
 		RETRY_TARGET.append(url)
+	return None
 
 			
 def print_next(input_string, target_substring, num_next):
@@ -308,6 +310,8 @@ def get_content_link(url, full_time, list_find_str, saveRes, list_pattern, more_
 	while retry:
 		try:
 			r = send_request(domain, api, data, headers)
+			if r is None:
+				return result
 			if verbose == "true":
 				print("https://web.archive.org" + url)
 			if r.status_code == 429:
@@ -363,6 +367,9 @@ def get_content(url, full_time, list_find_str, saveRes, list_pattern, more_print
 	while retry:
 		try:
 			r = send_request(domain, api, data, headers, retry_record=True)
+			if r is None:
+				return result
+			
 			if verbose == "true":
 				print("https://web.archive.org" + api)
 			if r.status_code == 429:
@@ -461,11 +468,15 @@ def get_snapshot_fulltime(url, year=None, month=None):
 	# r = requests.get("https://web.archive.org" + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
 	r = send_request(domain, api, data, headers, retry_record=True)
 
-	while r.status_code == 429:
-		print(colored("429 Too Many Requests! Paused in 20s. Please change your IP!", "red"))
-		time.sleep(10)
-		# r = requests.get(url+api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
-		r = send_request(domain, api, data, headers, retry_record=True)
+
+	if r is not None:
+		while r.status_code == 429:
+			print(colored("429 Too Many Requests! Paused in 20s. Please change your IP!", "red"))
+			time.sleep(10)
+			# r = requests.get(url+api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
+			r = send_request(domain, api, data, headers, retry_record=True)
+			if r is None:
+				return found_fulltimes
 
 	if len(r.json()) > 0:
 		all = r.json()["items"]
