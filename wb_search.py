@@ -8,11 +8,22 @@ from datetime import date, timedelta
 import os
 from bs4 import BeautifulSoup
 import re
+import signal
 
 
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
+def handler(signum, frame):
+	global RETRY_TARGET
+	res = input("Ctrl-c was pressed. Do you really want to exit? y/n ")
+	if res == 'y':
+		if len(RETRY_TARGET) > 0:
+			print("[INFO] List of domains needed to retry: ")
+			for domain in list(dict.fromkeys(RETRY_TARGET)):
+				print(domain)
+		exit(1)
 
 def save_response(domain, fulltime, data, status_code, saveRes):
 	if saveRes is not None:
@@ -46,10 +57,12 @@ def save_response_link(domain, path, fulltime, data, status_code, saveRes):
 
 
 
-def send_request(domain, api, data, headers):
+def send_request(domain, api, data, headers, retry_record=False):
+	global RETRY_TARGET
+	retry_count = 0
 	retry = True	
 	global HTTP_CONFIG
-	while retry:
+	while retry and retry < 10: 
 		try:	
 			r = requests.get("https://{}".format(domain) + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True, timeout=20)
 			retry = False
@@ -58,7 +71,32 @@ def send_request(domain, api, data, headers):
 		except:
 			retry = True
 			print(colored("[Error] Can't connect to {}".format(domain), "red"))
+			retry_count += 1
 			time.sleep(5)
+	if retry_record:
+		print(colored("[INFO] SKIP {}".format("https://{}".format(domain) + api), "yellow"))
+		RETRY_TARGET.append(domain)
+
+def send_request_2(url, retry_record=False):
+	global RETRY_TARGET
+	retry_count = 0
+	retry = True	
+	global HTTP_CONFIG
+	while retry and retry < 10: 
+		try:	
+			r = requests.get(url, verify=False, allow_redirects=True, timeout=20)
+			retry = False
+			# print(colored("[Info] Connected to {}".format(domain), "green"))
+			return r
+		except:
+			retry = True
+			print(colored("[Error] Can't connect to {}".format(domain), "red"))
+			retry_count += 1
+			time.sleep(5)
+	if retry_record:
+		print(colored("[INFO] SKIP {}".format("https://{}".format(domain) + api), "yellow"))
+		RETRY_TARGET.append(url)
+
 			
 def print_next(input_string, target_substring, num_next):
 	index = input_string.find(target_substring)
@@ -220,7 +258,7 @@ def get_all_links(url):
 	
 	found = []
 	# Make a request to the URL
-	response = requests.get(url)
+	response = send_request_2(url)
 
 	# Check if the request was successful (status code 200)
 	if response.status_code == 200:
@@ -248,7 +286,7 @@ def get_all_links(url):
 						found.append(src.replace("https://web.archive.org","").replace("//web.archive.org",""))
 
 	else:
-		print(f"Error: Unable to fetch the page. Status code: {response.status_code}")
+		print(colored(f"Error: Unable to fetch the page. Status code: {response.status_code}", "red"))
 	return found
 
 
@@ -324,7 +362,7 @@ def get_content(url, full_time, list_find_str, saveRes, list_pattern, more_print
 	retry = True
 	while retry:
 		try:
-			r = send_request(domain, api, data, headers)
+			r = send_request(domain, api, data, headers, retry_record=True)
 			if verbose == "true":
 				print("https://web.archive.org" + api)
 			if r.status_code == 429:
@@ -421,13 +459,13 @@ def get_snapshot_fulltime(url, year=None, month=None):
 	domain = "web.archive.org"
 
 	# r = requests.get("https://web.archive.org" + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
-	r = send_request(domain, api, data, headers)
+	r = send_request(domain, api, data, headers, retry_record=True)
 
 	while r.status_code == 429:
 		print(colored("429 Too Many Requests! Paused in 20s. Please change your IP!", "red"))
 		time.sleep(10)
 		# r = requests.get(url+api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
-		r = send_request(domain, api, data, headers)
+		r = send_request(domain, api, data, headers, retry_record=True)
 
 	if len(r.json()) > 0:
 		all = r.json()["items"]
@@ -567,6 +605,8 @@ parser.add_argument('--example', type=str, help='python3 wb_search.py --d www.me
 args = parser.parse_args()
 
 HTTP_CONFIG = {}
+
+RETRY_TARGET = []
 
 if args.proxy != None:
 	HTTP_CONFIG = {
