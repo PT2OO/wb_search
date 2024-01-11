@@ -474,16 +474,16 @@ def get_snapshot_fulltime(url, year=None, month=None):
 
 	# r = requests.get("https://web.archive.org" + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
 	r = send_request(domain, api, data, headers, retry_record=True)
-
-
-	if r is not None:
-		while r.status_code == 429:
-			print(colored("429 Too Many Requests! Paused in 20s. Please change your IP!", "red"))
-			time.sleep(10)
-			# r = requests.get(url+api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
-			r = send_request(domain, api, data, headers, retry_record=True)
-			if r is None:
-				return found_fulltimes
+	if r is None:
+		return found_fulltimes
+	
+	while r.status_code == 429:
+		print(colored("429 Too Many Requests! Paused in 20s. Please change your IP!", "red"))
+		time.sleep(10)
+		# r = requests.get(url+api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True)
+		r = send_request(domain, api, data, headers, retry_record=True)
+		if r is None:
+			return found_fulltimes
 
 	if len(r.json()) > 0:
 		all = r.json()["items"]
