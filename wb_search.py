@@ -273,7 +273,7 @@ def get_content_link(url, full_time, list_find_str, saveRes, list_pattern, more_
 			if verbose == "true":
 				print("https://web.archive.org" + url)
 			if r.status_code == 429:
-				print(colored("429 Too Many Requests! Paused in 7s, please change your IP!"))
+				print(colored("429 Too Many Requests! Paused in 7s, please change your IP!", "red"))
 				time.sleep(7)
 				retry = True
 			if r.status_code == 200:
@@ -328,7 +328,7 @@ def get_content(url, full_time, list_find_str, saveRes, list_pattern, more_print
 			if verbose == "true":
 				print("https://web.archive.org" + api)
 			if r.status_code == 429:
-				print(colored("429 Too Many Requests! Paused in 7s, please change your IP!"))
+				print(colored("429 Too Many Requests! Paused in 7s, please change your IP!", "red"))
 				time.sleep(7)
 				retry = True
 			if r.status_code == 200:
@@ -478,8 +478,8 @@ class myThread (threading.Thread):
 			for link in dedup_found_links:
 				founds_via_link = get_content_link(link, self.full_time, list_find_str, self.saveRes, self.list_pattern, self.more_print, self.verbose)
 				founds.extend(founds_via_link)
-		else:
-			print("Debug")
+		# else:
+		# 	print("Debug")
 			
 		if len(founds) > 0:
 			for found in founds:
@@ -516,13 +516,13 @@ def send_request_multiThread(url, found_fulltimes, list_find_str, numOfThreads, 
 
 def find(url, found_fulltimes, list_find_str, num_of_threads, timestamp, more_print, output, verbose, saveRes, list_pattern):
 	print(colored("==> Checking domain {}".format(url), "yellow"))
-	print(colored("    [#] String:", "yellow"))
-	for x in list_find_str:
-		print(colored("                {}".format(x), "yellow"))
+	# print(colored("    [#] String:", "yellow"))
+	# for x in list_find_str:
+	# 	print(colored("                {}".format(x), "yellow"))
 
-	print(colored("    [#] Regex pattern:", "yellow"))
-	for y in list_pattern:
-		print(colored("                {}".format(y), "yellow"))
+	# print(colored("    [#] Regex pattern:", "yellow"))
+	# for y in list_pattern:
+	# 	print(colored("                {}".format(y), "yellow"))
 	# for full_time in found_fulltimes:
 		# get_content(url, full_time, find_str)
 	send_request_multiThread(url, found_fulltimes, list_find_str, num_of_threads, timestamp, more_print, output, verbose, saveRes, list_pattern)
@@ -579,7 +579,7 @@ find_str = args.s
 path_find_str = args.sf
 year = args.y
 month = args.m
-num_of_threads = "3"
+num_of_threads = "10"
 extract = args.extract
 eachMonth = args.eachMonth
 eachDay = args.eachDay
@@ -638,6 +638,14 @@ if sre is not None:
 if len(list_pattern) == 0 and len(list_find_str) == 0:
 	print(colored("[Error] No string/pattern to find", "red"))
 	exit()
+
+print(colored("    [#] String:", "yellow"))
+for x in list_find_str:
+	print(colored("                {}".format(x), "yellow"))
+
+print(colored("    [#] Regex pattern:", "yellow"))
+for y in list_pattern:
+	print(colored("                {}".format(y), "yellow"))
 
 timestamp = str(int(time.time()))
 
