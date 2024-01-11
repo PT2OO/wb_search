@@ -90,11 +90,11 @@ def send_request_2(url, retry_record=False):
 			return r
 		except:
 			retry = True
-			print(colored("[Error] Can't connect to {}".format(domain), "red"))
+			print(colored("[Error] Can't connect to {}".format(url), "red"))
 			retry_count += 1
 			time.sleep(5)
 	if retry_record:
-		print(colored("[INFO] SKIP {}".format("https://{}".format(domain) + api), "yellow"))
+		print(colored("[INFO] SKIP {}".format(url), "yellow"))
 		RETRY_TARGET.append(url)
 
 			
