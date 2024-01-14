@@ -9,6 +9,7 @@ import os
 from bs4 import BeautifulSoup
 import re
 import signal
+import discord_webhook
 
 
 
@@ -24,6 +25,13 @@ def handler(signum, frame):
 			for domain in list(dict.fromkeys(RETRY_TARGET)):
 				print(domain)
 		exit(1)
+
+def push_noti(report_content, file_name):
+	global WEB_HOOK_URL
+	if WEB_HOOK_URL != "":
+		webhook = discord_webhook.DiscordWebhook(WEB_HOOK_URL)
+		webhook.add_file(file=report_content, filename=file_name)
+		webhook.execute()
 
 def save_response(domain, fulltime, data, status_code, saveRes):
 	if saveRes is not None:
@@ -64,7 +72,7 @@ def send_request(domain, api, data, headers, retry_record=False):
 	global HTTP_CONFIG
 	while retry and retry_count < 10: 
 		try:
-			print("debug1")
+			# print("debug1")
 			r = requests.get("https://{}".format(domain) + api, params=data, headers=headers, proxies=HTTP_CONFIG, verify=False, allow_redirects=True, timeout=20)
 			retry = False
 			# print(colored("[Info] Connected to {}".format(domain), "green"))
@@ -72,12 +80,12 @@ def send_request(domain, api, data, headers, retry_record=False):
 		except:
 			retry = True
 			retry_count += 1
-			print("debug2")
+			# print("debug2")
 			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count), domain), "red"))
 			
 			time.sleep(5)
 	if retry_record:
-		print("debug3")
+		# print("debug3")
 		print(colored("[INFO] SKIP {}".format("https://{}".format(domain) + api), "yellow"))
 		RETRY_TARGET.append(domain)
 	return None
@@ -336,8 +344,9 @@ def get_content_link(url, full_time, list_find_str, saveRes, list_pattern, more_
 						lines = r.text.split("\n")
 						for line in lines:
 							if find_str.split("\t")[1] in line:
-								result.append("https://web.archive.org{} ===> {} ".format(url, print_next(line, find_str.split("\t")[1], int(more_print))))
+								result.append("[Found] ({}) {}".format(find_str.split("\t")[0] ,"https://web.archive.org{} ===> {} ".format( url, print_next(line, find_str.split("\t")[1], int(more_print)))))
 								print(colored("[Found] ({}) {}".format(find_str.split("\t")[0] ,"https://web.archive.org{} ===> {} ".format( url, print_next(line, find_str.split("\t")[1], int(more_print)))), "green"))
+								# push_noti("[Found] ({}) {}".format(find_str.split("\t")[0] ,"https://web.archive.org{} ===> {} ".format( url, print_next(line, find_str.split("\t")[1], int(more_print)))))
 			
 			if len(list_pattern) > 0:
 				for pattern in list_pattern:
@@ -346,8 +355,9 @@ def get_content_link(url, full_time, list_find_str, saveRes, list_pattern, more_
 						re_founds = find_re(res_text, pattern.split("\t")[1])
 						if len(re_founds) > 0:
 							for re_found in re_founds:
-								result.append("https://web.archive.org{} ===> {} ({})".format(url, re_found, pattern.split("\t")[0]))
+								result.append("[Found] ({}) {}".format(pattern.split("\t")[0] , "https://web.archive.org{} ===> {}".format(url, re_found)))
 								print(colored("[Found] ({}) {}".format(pattern.split("\t")[0] , "https://web.archive.org{} ===> {}".format(url, re_found)), "green"))
+								# push_noti("[Found] ({}) {}".format(pattern.split("\t")[0] , "https://web.archive.org{} ===> {}".format(url, re_found)))
 
 							
 			retry = False
@@ -392,8 +402,9 @@ def get_content(url, full_time, list_find_str, saveRes, list_pattern, more_print
 						lines = r.text.split("\n")
 						for line in lines:
 							if find_str.split("\t")[1] in line:
-								result.append("https://web.archive.org{} ===> {} ".format(url, print_next(line, find_str.split("\t")[1], int(more_print))))
+								result.append("[Found] ({}) {}".format(find_str.split("\t")[0] ,"https://web.archive.org{} ===> {} ".format( url, print_next(line, find_str.split("\t")[1], int(more_print)))))
 								print(colored("[Found] ({}) {}".format(find_str.split("\t")[0] ,"https://web.archive.org{} ===> {} ".format( url, print_next(line, find_str.split("\t")[1], int(more_print)))), "green"))
+								# push_noti("[Found] ({}) {}".format(find_str.split("\t")[0] ,"https://web.archive.org{} ===> {} ".format( url, print_next(line, find_str.split("\t")[1], int(more_print)))))
 
 			if len(list_pattern) > 0:
 				for pattern in list_pattern:
@@ -402,8 +413,9 @@ def get_content(url, full_time, list_find_str, saveRes, list_pattern, more_print
 						re_founds = find_re(res_text, pattern.split("\t")[1])
 						if len(re_founds) > 0:
 							for re_found in re_founds:
-								result.append("https://web.archive.org{} ===> {} ({})".format(url, re_found, pattern.split("\t")[0]))
+								result.append("[Found] ({}) {}".format(pattern.split("\t")[0] , "https://web.archive.org{} ===> {}".format(url, re_found)))
 								print(colored("[Found] ({}) {}".format(pattern.split("\t")[0] , "https://web.archive.org{} ===> {}".format(url, re_found)), "green"))
+								# push_noti("[Found] ({}) {}".format(pattern.split("\t")[0] , "https://web.archive.org{} ===> {}".format(url, re_found)))
 
 
 			retry = False
@@ -618,6 +630,7 @@ parser.add_argument('--output', type=str, help='Path to directory to save result
 parser.add_argument('--saveRes', type=str, help='Path to directory to save responses')
 parser.add_argument('--verbose', type=str, help='Verbose')
 parser.add_argument('--proxy', type=str, help='--proxy http://127.0.0.1:8080')
+parser.add_argument('--notify', type=str, help='Notify founds to discord, config in file discord-config.txt "--notify true" (default is None)')
 parser.add_argument('--example', type=str, help='python3 wb_search.py --d www.metronet.com --sref wb_search_patterns.txt --sf wb_search_strings.txt --more_print 50 --y 2023 --eachDay true --m 10 --saveRes "/tmp/WB_DB" --verbose true')
 
 args = parser.parse_args()
@@ -625,6 +638,8 @@ args = parser.parse_args()
 HTTP_CONFIG = {}
 
 RETRY_TARGET = []
+
+WEB_HOOK_URL = ""
 
 if args.proxy != None:
 	HTTP_CONFIG = {
@@ -647,6 +662,7 @@ output = args.output
 saveRes = args.saveRes
 sre = args.sre
 sref = args.sref
+notify = args.notify
 verbose = args.verbose
 
 if saveRes is not None:
@@ -677,7 +693,15 @@ if find_str is None and path_find_str is not None:
 if find_str is not None:
 	list_find_str.append("String\t" + find_str)
 
-
+if notify == "true":
+	with open("discord-config.txt", "r") as f:
+		for line in f:
+			if "https://discord.com/api/webhooks" in line:
+				WEB_HOOK_URL = line.strip().replace("\n","")
+				break
+	if WEB_HOOK_URL == "":
+		print(colored("[Error] No valid webhook url".format(sref), "red"))
+		exit()
 	
 list_pattern = []
 
@@ -748,6 +772,13 @@ if url is not None and file is None:
 		find(url, found_fulltimes, list_find_str, num_of_threads, timestamp, more_print, output, verbose, saveRes, list_pattern)
 	
 	print(colored("Saved result to {}".format("{}/{}_{}.txt".format(output, url, timestamp)), "yellow"))
+
+	if WEB_HOOK_URL != "":
+		file_path = "{}/{}_{}.txt".format(output, url, timestamp)
+		if os.path.exists(file_path):
+			with open(file_path, "rb") as f:
+				report_content = f.read()
+			push_noti(report_content, "{}_{}.txt".format(output, url, timestamp))
 	
 
 
