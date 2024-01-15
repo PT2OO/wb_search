@@ -81,7 +81,7 @@ def send_request(domain, api, data, headers, retry_record=False):
 			retry = True
 			retry_count += 1
 			# print("debug2")
-			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count), domain), "red"))
+			print(colored("[Error] [{}] Can't connect to {}".format(str(retry_count), "https://{}".format(domain) + api), "red"))
 			
 			time.sleep(5)
 	if retry_record:
